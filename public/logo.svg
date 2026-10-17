@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AzadGram logo v3 — paper plane on turquoise gradient (matches app icon) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">
+  <defs>
+    <linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#40E0D0"/>
+      <stop offset="55%" stop-color="#00BFA5"/>
+      <stop offset="100%" stop-color="#02544A"/>
+    </linearGradient>
+    <linearGradient id="sailB" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E8FFFA"/>
+      <stop offset="100%" stop-color="#C6F2E5"/>
+    </linearGradient>
+  </defs>
+  <rect width="30" height="30" rx="8" fill="url(#ag)"/>
+  <g transform="translate(15,14.6) rotate(-32) translate(-15,-14.6)">
+    <!-- upper sail -->
+    <polygon points="23.4,14.6 8.9,8.4 12.6,14.9" fill="#FFFFFF"/>
+    <!-- lower sail -->
+    <polygon points="23.4,14.6 8.9,21.1 12.6,14.9" fill="url(#sailB)"/>
+    <!-- lower fold -->
+    <polygon points="23.4,14.6 10.2,19.2 12.6,14.9" fill="#ACEADC"/>
+  </g>
+  <!-- motion trail -->
+  <circle cx="8.2" cy="20.4" r="1.25" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="6.2" cy="22.2" r="0.95" fill="#FFFFFF" opacity="0.62"/>
+  <circle cx="4.6" cy="23.6" r="0.7" fill="#FFFFFF" opacity="0.4"/>
+</svg>

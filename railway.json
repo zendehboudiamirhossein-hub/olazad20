@@ -1,0 +1,16 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommands": [
+      "bun install --frozen-lockfile",
+      "bun run db:generate",
+      "bun run build"
+    ]
+  },
+  "deploy": {
+    "startCommand": "bunx prisma db push --accept-data-loss --skip-generate && bun run start",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

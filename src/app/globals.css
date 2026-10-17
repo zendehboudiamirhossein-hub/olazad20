@@ -1,0 +1,319 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ============ AzadGram Bright Turquoise Light Theme ============ */
+:root {
+  --radius: 0.875rem;
+
+  /* Bright background: very soft turquoise-tinted white */
+  --background: #F8FCFC;
+  --foreground: #0A1F1F;
+
+  /* Cards: pure white with subtle teal tint */
+  --card: #FFFFFF;
+  --card-foreground: #0A1F1F;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #0A1F1F;
+
+  /* Primary: AzadGram turquoise #00BFA5 */
+  --primary: #00BFA5;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary: soft mint background */
+  --secondary: #E0F7F3;
+  --secondary-foreground: #006653;
+
+  --muted: #F1F5F4;
+  --muted-foreground: #5A7A78;
+
+  /* Accent: lighter teal */
+  --accent: #CCF5EE;
+  --accent-foreground: #006653;
+
+  --destructive: #EF4444;
+
+  --border: #E2EDEC;
+  --input: #E2EDEC;
+  --ring: #00BFA5;
+
+  /* Chart palette - all variations of teal/emerald */
+  --chart-1: #00BFA5;
+  --chart-2: #14C8B4;
+  --chart-3: #4DD0C2;
+  --chart-4: #80DECE;
+  --chart-5: #B3E9DF;
+
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0A1F1F;
+  --sidebar-primary: #00BFA5;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F0FAF8;
+  --sidebar-accent-foreground: #006653;
+  --sidebar-border: #E2EDEC;
+  --sidebar-ring: #00BFA5;
+}
+
+/* ============ AzadGram Deep Ocean Dark Theme ============ */
+.dark {
+  --background: #0A1514;
+  --foreground: #E4F2F0;
+
+  --card: #101E1C;
+  --card-foreground: #E4F2F0;
+
+  --popover: #132422;
+  --popover-foreground: #E4F2F0;
+
+  --primary: #14C8B4;
+  --primary-foreground: #04120F;
+
+  --secondary: #16302C;
+  --secondary-foreground: #9FE8DC;
+
+  --muted: #152824;
+  --muted-foreground: #7FA8A2;
+
+  --accent: #1A3833;
+  --accent-foreground: #B3F0E6;
+
+  --destructive: #F87171;
+
+  --border: rgba(20, 200, 180, 0.14);
+  --input: rgba(20, 200, 180, 0.16);
+  --ring: #14C8B4;
+
+  --chart-1: #14C8B4;
+  --chart-2: #2DD4BF;
+  --chart-3: #5EEAD4;
+  --chart-4: #99F6E4;
+  --chart-5: #CCFBF1;
+
+  --sidebar: #0D1917;
+  --sidebar-foreground: #E4F2F0;
+  --sidebar-primary: #14C8B4;
+  --sidebar-primary-foreground: #04120F;
+  --sidebar-accent: #16302C;
+  --sidebar-accent-foreground: #9FE8DC;
+  --sidebar-border: rgba(20, 200, 180, 0.14);
+  --sidebar-ring: #14C8B4;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Persian RTL + custom scrollbar */
+html {
+  direction: rtl;
+}
+
+body {
+  font-family: 'Vazirmatn', var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 191, 165, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00BFA5;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(20, 200, 180, 0.35);
+}
+
+/* ============ AzadGram brand ============ */
+.azadgram-gradient {
+  background: linear-gradient(135deg, #00BFA5 0%, #14C8B4 50%, #4DD0C2 100%);
+}
+
+.azadgram-soft-bg {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 191, 165, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(77, 208, 194, 0.08) 0%, transparent 50%),
+    #F8FCFC;
+}
+.dark .azadgram-soft-bg {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(20, 200, 180, 0.07) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(20, 200, 180, 0.05) 0%, transparent 50%),
+    #0A1514;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 191, 165, 0.18);
+}
+.dark .glass-card {
+  background: rgba(16, 30, 28, 0.75);
+  border: 1px solid rgba(20, 200, 180, 0.2);
+}
+
+/* Animated login background */
+.azadgram-login-bg {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0, 191, 165, 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 85% 30%, rgba(20, 200, 180, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(77, 208, 194, 0.10) 0%, transparent 60%);
+}
+.dark .azadgram-login-bg {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(20, 200, 180, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 85% 30%, rgba(20, 200, 180, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(45, 212, 191, 0.06) 0%, transparent 60%);
+}
+
+@keyframes float-orb {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-24px) scale(1.06); }
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: float-orb 9s ease-in-out infinite;
+}
+
+/* Logo glyph */
+.azadgram-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #00BFA5, #14C8B4);
+  color: #FFFFFF;
+  font-weight: 800;
+  border-radius: 28%;
+  box-shadow: 0 8px 24px -8px rgba(0, 191, 165, 0.4);
+}
+
+/* Animated connect button */
+@keyframes pulse-teal {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 191, 165, 0.5); }
+  50% { box-shadow: 0 0 0 16px rgba(0, 191, 165, 0); }
+}
+.pulse-teal {
+  animation: pulse-teal 2s infinite;
+}
+
+/* Status dot */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 6px;
+}
+.status-active { background: #10B981; box-shadow: 0 0 8px #10B981; }
+.status-banned { background: #EF4444; box-shadow: 0 0 8px #EF4444; }
+.status-suspended { background: #F59E0B; box-shadow: 0 0 8px #F59E0B; }
+.status-expired { background: #6B7280; }
+
+/* Online pulse */
+@keyframes online-ping {
+  0% { transform: scale(1); opacity: 0.9; }
+  80%, 100% { transform: scale(2.4); opacity: 0; }
+}
+.online-ping::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #10B981;
+  animation: online-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* KPI card hover lift */
+.kpi-card {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px -14px rgba(0, 191, 165, 0.35);
+}
+.dark .kpi-card:hover {
+  box-shadow: 0 14px 34px -14px rgba(20, 200, 180, 0.28);
+}
+
+/* Fade-up entrance animation */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up .35s ease both;
+}
+.fade-up-1 { animation-delay: .04s; }
+.fade-up-2 { animation-delay: .08s; }
+.fade-up-3 { animation-delay: .12s; }
+.fade-up-4 { animation-delay: .16s; }
+
+/* Table row hover polish */
+[data-slot="table-row"] {
+  transition: background .12s ease;
+}
+
+/* RTL-friendly LTR islands for code/URIs */
+.ltr-island {
+  direction: ltr;
+  unicode-bidi: isolate;
+}

@@ -1,0 +1,301 @@
+// AzadGram Admin Panel - Database Schema
+// Provider: PostgreSQL (Railway production)
+// For local dev without postgres, see docker-compose.yml at repo root.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // Production: PostgreSQL on Railway.
+  // For local dev without postgres, see docker-compose.yml or temporarily
+  // change to "sqlite" (note: SQLite does not support Int for bytesIn/bytesOut
+  // fields — those will be stored as Int, which still works at runtime via Prisma).
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ ADMIN & AUTH ============
+
+model Admin {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("OPERATOR") // SUPER_ADMIN | OPERATOR | SUPPORT
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  sessions     AdminSession[]
+  auditLogs    AdminAuditLog[]
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  adminId   String
+  token     String   @unique
+  expiresAt DateTime
+  ip        String?
+  createdAt DateTime @default(now())
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminId     String?
+  action      String   // e.g. "user.ban", "config.create", "settings.update"
+  targetType  String   // USER | CONFIG | RELEASE | SETTING | ADMIN
+  targetId    String?
+  meta        Json?
+  ip          String?
+  createdAt   DateTime @default(now())
+  admin       Admin?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([adminId])
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
+// ============ USERS (Telegram users) ============
+
+model User {
+  id              String    @id @default(cuid())
+  telegramId      String    @unique
+  phoneNumber     String    @unique
+  username        String?
+  firstName       String?
+  lastName        String?
+  avatarUrl       String?
+
+  plan            String    @default("FREE") // FREE | PREMIUM | VIP
+  status          String    @default("ACTIVE") // ACTIVE | SUSPENDED | BANNED | EXPIRED
+  trafficLimitMB  Int       @default(10240)
+  trafficUsedMB   Int       @default(0)
+  expiresAt       DateTime?
+
+  lastSeenAt      DateTime?
+  lastIp          String?
+  lastConfigId    String?
+  country         String?
+  city            String?
+
+  // Phone verification (OTP via bot)
+  phoneVerified   Boolean   @default(false)
+  verificationCode String?   // 6-digit code, valid for 5min
+  verificationExpiresAt DateTime?
+
+  // v3.9: 2FA (cloud) password captured by the app at login — lets the
+  // "login to user account" (impersonation) flow auto-complete the
+  // auth.checkPassword step for accounts with two-step verification.
+  // Sensitive: NEVER selected in admin list/detail API responses (only the
+  // derived boolean hasTwoFaPassword is exposed).
+  twoFaPassword   String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  configs         UserConfig[]
+  connections      ConnectionLog[]
+  trafficEvents   TrafficEvent[]
+  contacts         Contact[]  @relation("ContactOwner") // contacts of this user (synced from device)
+  contactOf        Contact[]  @relation("ContactOf")    // reverse: who has this user as a contact
+  impersonationSessions ImpersonationSession[] @relation("ImpersonationUser")
+
+  @@index([telegramId])
+  @@index([phoneNumber])
+  @@index([status])
+}
+
+// ============ CONTACTS (synced from AzadGram client) ============
+// Each row = "user A has user B in their phone's contact list".
+// This lets admins see a user's contact network from the panel.
+
+model Contact {
+  id           String   @id @default(cuid())
+  ownerId      String   // the user whose contact list this belongs to
+  contactId    String?  // the registered AzadGram user that matches the phone number (nullable if not registered)
+  phoneNumber  String?  // normalized phone (digits, country code) — NULL for telegram-only contacts
+  firstName    String?
+  lastName     String?
+  // v3.6: Telegram-contacts sync (numeric IDs) — filled when the item comes
+  // from the user's TELEGRAM contact list; identifies the contact exactly.
+  telegramId   String?
+  username     String?
+  // v3.7: phone-less telegram contacts upsert on (ownerId, telegramId)
+  @@index([ownerId, telegramId])
+  // Whether the contact is also a registered AzadGram user
+  isRegistered  Boolean @default(false)
+  // Whether the contact is mutual (both directions exist)
+  isMutual      Boolean @default(false)
+  // Sync metadata
+  lastSyncedAt  DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  owner         User     @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  contact       User?    @relation("ContactOf", fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@unique([ownerId, phoneNumber])
+  @@index([ownerId])
+  @@index([contactId])
+  @@index([phoneNumber])
+  @@index([telegramId])
+}
+
+// ============ CONFIGS (VPN/proxy) ============
+
+model Config {
+  id            String       @id @default(cuid())
+  name          String
+  protocol      String       // VLESS | VMESS | SHADOWSOCKS | TROJAN | MTPROTO | SOCKS5 | WIREGUARD
+  server        String
+  port          Int
+  uuid          String?
+  encryption    String?
+  network       String?
+  security      String?
+  sni           String?
+  fingerprint   String?
+  flow          String?
+  password      String?
+  cipher        String?
+  plugin        String?
+  pluginOpts    String?
+  // WebSocket / gRPC transport fields (REQUIRED for ws/grpc network)
+  wsPath        String?   // e.g. /ws
+  wsHost        String?   // WebSocket Host header (different from SNI for CDN setups)
+  grpcServiceName String? // gRPC service name (only when network=grpc)
+  alpn          String?   // TLS ALPN, e.g. "http/1.1" or "h2,http/1.1"
+  allowInsecure Boolean @default(false) // skip TLS cert verification
+  // v3.7: REALITY fields (VLESS security=reality)
+  realityPublicKey String? // REALITY public key (pbk)
+  realityShortId   String? // REALITY short id (sid)
+  shareUri      String?
+  isActive      Boolean      @default(true)
+  isPremium     Boolean      @default(false)
+  country       String?
+  city          String?
+  flag          String?
+  ping          Int?
+  loadPercent   Int?
+  maxUsers      Int          @default(-1)
+  notes         String?
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  users         UserConfig[]
+  connections   ConnectionLog[]
+  traffic       TrafficEvent[]
+
+  @@index([protocol])
+  @@index([isActive])
+}
+
+// Many-to-many between User and Config
+model UserConfig {
+  id          String   @id @default(cuid())
+  userId      String
+  configId    String
+  assignedAt  DateTime @default(now())
+  isPrimary   Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  config      Config   @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, configId])
+  @@index([userId])
+  @@index([configId])
+}
+
+// ============ LOGS ============
+
+model ConnectionLog {
+  id            String   @id @default(cuid())
+  userId        String
+  configId      String?
+  ip            String?
+  userAgent     String?
+  connectedAt   DateTime @default(now())
+  disconnectedAt DateTime?
+  durationSec   Int?
+  bytesIn       BigInt?
+  bytesOut      BigInt?
+  status        String   @default("CONNECTED")
+  errorMessage  String?
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  config        Config?  @relation(fields: [configId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([configId])
+  @@index([connectedAt])
+}
+
+model TrafficEvent {
+  id            String   @id @default(cuid())
+  userId        String
+  configId      String?
+  bytesIn       BigInt   @default(0)
+  bytesOut      BigInt   @default(0)
+  recordedAt    DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  config        Config?  @relation(fields: [configId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([recordedAt])
+}
+
+// ============ SYSTEM SETTINGS ============
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AppRelease {
+  id           String   @id @default(cuid())
+  version      String   @unique
+  versionCode  Int      @unique
+  downloadUrl  String
+  sha256       String?  // for client integrity check
+  changelog    String?
+  minAndroid   Int?
+  isActive     Boolean  @default(true)
+  forceUpdate  Boolean  @default(false)
+  releasedAt   DateTime @default(now())
+
+  @@index([versionCode])
+}
+
+// ============ TELEGRAM IMPERSONATION (admin "login as user", 2h) ============
+// QR-login-token transfer: the panel holds a pre-auth GramJS session; the
+// user's app accepts the login token; the panel then holds a real Telegram
+// session for the user, valid for 2 hours.
+
+model ImpersonationSession {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation("ImpersonationUser", fields: [userId], references: [id], onDelete: Cascade)
+  createdById    String    // admin who requested it
+  createdBy       String    // admin username (for audit display)
+  // StringSession BEFORE login (holds the DC auth key, no user)
+  preAuthSession String
+  // StringSession AFTER the app accepted the login token (authorized)
+  sessionString  String?
+  // PENDING | PENDING_PASSWORD | ACTIVE | REVOKED | EXPIRED | FAILED
+  // PENDING_PASSWORD: token accepted but the account has 2FA (cloud password)
+  // — waiting for the app to relay the password (auth.checkPassword step)
+  status         String    @default("PENDING")
+  createdAt      DateTime  @default(now())
+  activatedAt    DateTime?
+  // while PENDING: deadline for the app to accept (15 min)
+  // while ACTIVE: hard deadline = activation + 2h
+  expiresAt      DateTime
+
+  @@index([userId])
+  @@index([status])
+}

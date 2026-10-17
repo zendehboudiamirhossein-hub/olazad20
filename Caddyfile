@@ -1,0 +1,18 @@
+# AzadGram Caddyfile
+# Local development gateway.
+# On Railway, this file is NOT used — Railway uses its own routing.
+# The XTransformPort handler is dev-only; for production, it's not needed.
+
+:81 {
+	# In production, Railway handles the routing directly.
+	# Remove this @transform_port_query block on prod deployments.
+
+	handle {
+		reverse_proxy localhost:3000 {
+			header_up Host {host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+			header_up X-Real-IP {remote_host}
+		}
+	}
+}
